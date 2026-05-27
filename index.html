@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOZÈRE 48 — Merch</title>
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+  :root {
+    --granite:#3d3530; --terre:#7a5c3f; --mousse:#4a6741; --mousse-light:#7a9e6e;
+    --ciel:#5b7fa6; --beige:#f2ede6; --orange:#c9622f; --white:#fff; --dark:#1e1a17;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',sans-serif;background:var(--beige);color:var(--dark);}
+
+  nav{position:fixed;top:0;width:100%;z-index:100;background:rgba(30,26,23,0.97);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px;}
+  .logo{color:var(--white);font-size:1.5rem;font-weight:900;letter-spacing:3px;display:flex;align-items:center;gap:10px;}
+  .logo-48{background:var(--orange);color:white;font-size:0.85rem;font-weight:900;padding:2px 8px;border-radius:6px;}
+  .nav-links{display:flex;gap:2rem;list-style:none;}
+  .nav-links a{color:#ccc;text-decoration:none;font-size:0.88rem;transition:color .2s;letter-spacing:1px;text-transform:uppercase;}
+  .nav-links a:hover{color:var(--orange);}
+  .cart-btn{background:var(--orange);color:white;border:none;padding:8px 18px;border-radius:20px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:8px;transition:transform .2s;}
+  .cart-btn:hover{transform:scale(1.05);background:#b0521f;}
+  .cart-count{background:white;color:var(--orange);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;}
+
+  .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;text-align:center;padding:80px 2rem 2rem;background:#1e1a17;}
+  .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 60%,rgba(74,103,65,.5) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(91,127,166,.3) 0%,transparent 50%),radial-gradient(ellipse at 50% 100%,rgba(122,92,63,.6) 0%,transparent 60%),#1e1a17;}
+  .mountains-svg{position:absolute;bottom:0;left:0;width:100%;pointer-events:none;}
+  .hero-content{position:relative;z-index:2;max-width:750px;}
+  .hero-dept{display:inline-flex;align-items:center;gap:8px;background:rgba(201,98,47,.2);border:1px solid rgba(201,98,47,.5);color:var(--orange);padding:5px 16px;border-radius:20px;font-size:0.78rem;font-weight:700;letter-spacing:3px;margin-bottom:1.5rem;text-transform:uppercase;}
+  .hero h1{font-size:clamp(3rem,7vw,6rem);font-weight:900;color:white;line-height:1;margin-bottom:1rem;letter-spacing:-1px;}
+  .hero h1 .dept{color:var(--orange);}
+  .hero-sub{color:rgba(255,255,255,.65);font-size:1.05rem;margin-bottom:.5rem;font-style:italic;}
+  .hero-tagline{color:rgba(255,255,255,.9);font-size:1.1rem;margin-bottom:2rem;font-weight:600;}
+  .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+  .btn-sport{background:var(--mousse);color:white;padding:14px 32px;border-radius:30px;font-weight:700;font-size:1rem;cursor:pointer;border:none;transition:all .2s;}
+  .btn-sport:hover{background:#3a5533;transform:translateY(-2px);}
+  .btn-lifestyle{background:var(--orange);color:white;padding:14px 32px;border-radius:30px;font-weight:700;font-size:1rem;cursor:pointer;border:none;transition:all .2s;}
+  .btn-lifestyle:hover{background:#b0521f;transform:translateY(-2px);}
+
+  .spirit-band{background:var(--granite);color:rgba(255,255,255,.6);display:flex;justify-content:center;gap:3rem;padding:14px 2rem;font-size:0.82rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;flex-wrap:wrap;}
+  .spirit-band span{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+
+  .shop-nav{background:white;position:sticky;top:64px;z-index:90;border-bottom:2px solid #eee;display:flex;justify-content:center;}
+  .tab-btn{padding:16px 40px;font-size:1rem;font-weight:800;cursor:pointer;border:none;background:none;color:#aaa;letter-spacing:2px;text-transform:uppercase;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;}
+  .tab-btn.active.sport{color:var(--mousse);border-bottom-color:var(--mousse);}
+  .tab-btn.active.lifestyle{color:var(--orange);border-bottom-color:var(--orange);}
+
+  .section-header{padding:50px 2rem 20px;text-align:center;}
+  .section-header .label{display:inline-block;color:white;font-size:0.72rem;font-weight:800;padding:4px 14px;border-radius:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+  .label.sport-label{background:var(--mousse);}
+  .label.lifestyle-label{background:var(--orange);}
+  .section-header h2{font-size:2rem;font-weight:900;margin-bottom:.4rem;}
+  .section-header p{color:#888;font-size:0.9rem;}
+
+  .prod-section{padding:20px 2rem 60px;}
+  .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem;max-width:1100px;margin:0 auto;}
+  .prod-card{background:white;border-radius:18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);transition:all .3s;border:1px solid #e8e0d5;}
+  .prod-card:hover{transform:translateY(-4px);box-shadow:0 14px 35px rgba(0,0,0,.12);}
+  .prod-img{height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;}
+  .prod-img.s1{background:linear-gradient(135deg,#d9e8d3,#b8d4b0);}
+  .prod-img.s2{background:linear-gradient(135deg,#cddbe8,#a8c4da);}
+  .prod-img.s3{background:linear-gradient(135deg,#d3e8e3,#b0d4cc);}
+  .prod-img.s4{background:linear-gradient(135deg,#dde3d9,#c0ccbb);}
+  .prod-img.l1{background:linear-gradient(135deg,#e8ddd3,#d4c4b0);}
+  .prod-img.l2{background:linear-gradient(135deg,#e8d3cb,#d4b0a8);}
+  .prod-img.l3{background:linear-gradient(135deg,#e8e3d3,#d4ccb0);}
+  .prod-img.l4{background:linear-gradient(135deg,#e3d3e8,#ccb0d4);}
+  .badge-new{position:absolute;top:10px;right:10px;color:white;font-size:0.7rem;font-weight:800;padding:3px 10px;border-radius:10px;letter-spacing:1px;}
+  .badge-new.sport{background:var(--mousse);}
+  .badge-new.lifestyle{background:var(--orange);}
+  .prod-info{padding:1.1rem;}
+  .prod-info h3{font-size:1rem;font-weight:800;margin-bottom:3px;}
+  .prod-info .sub{color:#888;font-size:0.8rem;margin-bottom:10px;font-style:italic;}
+  .prod-footer{display:flex;align-items:center;justify-content:space-between;}
+  .price{font-size:1.2rem;font-weight:900;}
+  .price.sport{color:var(--mousse);}
+  .price.lifestyle{color:var(--orange);}
+  .add-btn{color:white;border:none;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:0.85rem;font-weight:700;transition:all .2s;}
+  .add-btn.sport{background:var(--mousse);}
+  .add-btn.sport:hover{background:#3a5533;transform:scale(1.05);}
+  .add-btn.lifestyle{background:var(--orange);}
+  .add-btn.lifestyle:hover{background:#b0521f;transform:scale(1.05);}
+
+  .section-divider{height:6px;background:linear-gradient(90deg,var(--mousse),var(--orange));}
+
+  .loz-strip{background:linear-gradient(135deg,var(--mousse),#2d4a2a);color:white;padding:50px 2rem;}
+  .loz-strip-inner{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:2rem;text-align:center;}
+  .loz-fact .num{font-size:2.2rem;font-weight:900;margin-bottom:4px;}
+  .loz-fact .icon{font-size:1.8rem;margin-bottom:6px;}
+  .loz-fact .fact-label{font-size:0.8rem;color:rgba(255,255,255,.65);font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+  .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;opacity:0;pointer-events:none;transition:opacity .3s;}
+  .cart-overlay.open{opacity:1;pointer-events:all;}
+  .cart-panel{position:fixed;right:0;top:0;bottom:0;width:400px;max-width:100vw;background:white;z-index:201;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column;box-shadow:-4px 0 30px rgba(0,0,0,.15);}
+  .cart-panel.open{transform:translateX(0);}
+  .cart-header{padding:1.5rem;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;background:var(--dark);color:white;}
+  .cart-header h2{font-size:1.2rem;font-weight:800;}
+  .close-btn{background:none;border:none;font-size:1.5rem;cursor:pointer;color:rgba(255,255,255,.7);}
+  .cart-items{flex:1;overflow-y:auto;padding:1rem;background:var(--beige);}
+  .cart-empty{text-align:center;padding:3rem 1rem;color:#aaa;}
+  .cart-item{display:flex;gap:1rem;padding:1rem;border-radius:12px;background:white;margin-bottom:10px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+  .cart-item-img{width:60px;height:60px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;background:#f0ebe3;}
+  .cart-item-info{flex:1;}
+  .cart-item-info h4{font-size:.9rem;font-weight:700;margin-bottom:3px;}
+  .cart-item-info p{color:#888;font-size:.78rem;}
+  .qty-ctrl{display:flex;align-items:center;gap:8px;margin-top:6px;}
+  .qty-btn{width:24px;height:24px;border:1px solid #ddd;background:white;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+  .qty-btn:hover{background:var(--dark);color:white;border-color:var(--dark);}
+  .qty-num{font-weight:700;font-size:.9rem;min-width:20px;text-align:center;}
+  .remove-btn{background:none;border:none;color:#ccc;cursor:pointer;font-size:1.1rem;transition:color .2s;}
+  .remove-btn:hover{color:#e63946;}
+  .cart-footer{padding:1.5rem;border-top:1px solid #eee;background:white;}
+  .cart-total{display:flex;justify-content:space-between;font-size:1.2rem;font-weight:800;margin-bottom:1rem;}
+  .printful-note{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;font-size:.78rem;color:#166534;margin-bottom:1rem;display:flex;gap:8px;}
+  .checkout-btn{width:100%;background:var(--dark);color:white;border:none;padding:15px;border-radius:30px;font-size:1rem;font-weight:800;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:10px;}
+  .checkout-btn:hover{background:var(--orange);transform:translateY(-2px);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+  .modal-overlay.open{opacity:1;pointer-events:all;}
+  .modal{background:white;border-radius:20px;padding:2rem;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform .3s;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+  .modal-overlay.open .modal{transform:translateY(0);}
+  .modal h2{font-size:1.4rem;font-weight:800;margin-bottom:.5rem;}
+  .modal .sub-title{color:#888;font-size:.85rem;margin-bottom:1.5rem;}
+  .stripe-badge{display:flex;align-items:center;gap:8px;background:#635bff15;border:1px solid #635bff40;border-radius:10px;padding:10px 14px;margin-bottom:1.5rem;font-size:.82rem;color:#635bff;font-weight:600;}
+  .form-group{margin-bottom:1rem;}
+  .form-group label{display:block;font-size:.82rem;font-weight:700;color:#555;margin-bottom:6px;}
+  .form-group input{width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:10px;font-size:.95rem;outline:none;transition:border .2s;}
+  .form-group input:focus{border-color:var(--mousse);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .stripe-info{font-size:.78rem;color:#aaa;margin:1rem 0;}
+  .pay-btn{width:100%;background:#635bff;color:white;border:none;padding:15px;border-radius:30px;font-size:1rem;font-weight:800;cursor:pointer;transition:all .3s;margin-top:.5rem;}
+  .pay-btn:hover{background:#4f46e5;transform:translateY(-2px);}
+  .modal-cancel{width:100%;background:none;border:none;padding:12px;cursor:pointer;color:#aaa;font-size:.9rem;margin-top:8px;}
+  .success-screen{text-align:center;padding:1rem;}
+  .success-screen .s-icon{font-size:4rem;margin-bottom:1rem;}
+  .success-screen h2{font-size:1.5rem;font-weight:800;margin-bottom:.5rem;color:var(--mousse);}
+  .success-screen p{color:#666;font-size:.9rem;line-height:1.6;}
+
+  footer{background:var(--dark);color:#888;padding:3rem 2rem;text-align:center;}
+  .footer-logo{color:white;font-size:2rem;font-weight:900;letter-spacing:3px;margin-bottom:.5rem;}
+  .footer-dept{color:var(--orange);font-weight:700;margin-bottom:1rem;}
+  footer p{font-size:.82rem;line-height:1.8;}
+
+  .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark);color:white;padding:12px 24px;border-radius:30px;font-weight:700;z-index:400;transition:transform .3s;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  @media(max-width:600px){.nav-links{display:none;}.cart-panel{width:100vw;}.hero h1{font-size:2.5rem;}.tab-btn{padding:14px 24px;font-size:.85rem;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">LOZÈRE <span class="logo-48">48</span></div>
+  <ul class="nav-links">
+    <li><a href="#sport">Coin Sport</a></li>
+    <li><a href="#lifestyle">Coin Lifestyle</a></li>
+  </ul>
+  <button class="cart-btn" onclick="toggleCart()">
+    🛒 Panier <span class="cart-count" id="cartCount">0</span>
+  </button>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <svg class="mountains-svg" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <polygon points="0,320 0,220 120,120 220,180 340,80 480,160 580,60 720,140 840,40 960,130 1080,50 1200,150 1320,70 1440,160 1440,320" fill="rgba(74,103,65,0.3)"/>
+    <polygon points="0,320 0,260 100,200 200,240 320,160 440,220 560,140 680,200 800,120 920,190 1040,110 1160,200 1280,140 1440,220 1440,320" fill="rgba(61,53,48,0.5)"/>
+    <polygon points="0,320 0,300 180,240 360,290 540,230 720,280 900,220 1080,275 1260,230 1440,270 1440,320" fill="rgba(30,26,23,0.8)"/>
+  </svg>
+  <div class="hero-content">
+    <div class="hero-dept">🏔️ Département 48 · Occitanie</div>
+    <h1>Fier d'être<br><span class="dept">Lozérien</span></h1>
+    <p class="hero-sub">Aubrac · Margeride · Cévennes · Gorges du Tarn</p>
+    <p class="hero-tagline">Le merch du département le plus sauvage de France</p>
+    <div class="hero-btns">
+      <button class="btn-sport" onclick="document.getElementById('sport').scrollIntoView({behavior:'smooth'})">🏃 Coin Sport</button>
+      <button class="btn-lifestyle" onclick="document.getElementById('lifestyle').scrollIntoView({behavior:'smooth'})">🐂 Coin Lifestyle</button>
+    </div>
+  </div>
+</section>
+
+<div class="spirit-band">
+  <span>🐂 Aubrac</span>
+  <span>🌿 Margeride</span>
+  <span>🦅 Cévennes</span>
+  <span>🏞️ Gorges du Tarn</span>
+  <span>❄️ Mont Lozère</span>
+  <span>🌕 Ciel étoilé</span>
+</div>
+
+<div class="shop-nav">
+  <button class="tab-btn active sport" id="tab-sport" onclick="document.getElementById('sport').scrollIntoView({behavior:'smooth'})">🏃 Coin Sport</button>
+  <button class="tab-btn lifestyle" id="tab-lifestyle" onclick="document.getElementById('lifestyle').scrollIntoView({behavior:'smooth'})">🐂 Coin Lifestyle</button>
+</div>
+
+<div id="sport">
+  <div class="section-header">
+    <div class="label sport-label">🏃 Coin Sport</div>
+    <h2>Performance & Nature</h2>
+    <p>Des vêtements techniques pour affronter les terrains lozériens</p>
+  </div>
+  <div class="prod-section">
+    <div class="prod-grid" id="sportGrid"></div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<div id="lifestyle">
+  <div class="section-header" style="background:white;">
+    <div class="label lifestyle-label">🐂 Coin Lifestyle</div>
+    <h2>Fierté Lozérienne</h2>
+    <p>Porter l'identité du 48 au quotidien, partout dans le monde</p>
+  </div>
+  <div class="prod-section" style="background:white;">
+    <div class="prod-grid" id="lifestyleGrid"></div>
+  </div>
+</div>
+
+<div class="loz-strip">
+  <div class="loz-strip-inner">
+    <div class="loz-fact"><div class="icon">👥</div><div class="num">74 000</div><div class="fact-label">Habitants</div></div>
+    <div class="loz-fact"><div class="icon">⛰️</div><div class="num">1 699m</div><div class="fact-label">Mont Lozère</div></div>
+    <div class="loz-fact"><div class="icon">🌟</div><div class="num">N°1</div><div class="fact-label">Réserve ciel étoilé</div></div>
+    <div class="loz-fact"><div class="icon">🏔️</div><div class="num">48</div><div class="fact-label">Le numéro qui claque</div></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">LOZÈRE</div>
+  <div class="footer-dept">Département 48 — Occitanie — France</div>
+  <p>Livraison mondiale via <strong style="color:white">Printful</strong> · Paiement sécurisé par <strong style="color:white">Stripe</strong></p>
+  <p style="margin-top:1rem;font-size:.75rem">© 2025 Lozère Merch — Fait avec 🏔️ depuis le 48</p>
+</footer>
+
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <h2>🛒 Mon Panier</h2>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total"><span>Total</span><span id="cartTotal">0,00 €</span></div>
+    <div class="printful-note">🚚 <span>Via <strong>Printful</strong> — impression à la demande, livraison mondiale 5-10j.</span></div>
+    <button class="checkout-btn" onclick="openCheckout()">🔒 Payer avec Stripe</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal" id="checkoutForm">
+    <h2>💳 Paiement sécurisé</h2>
+    <p class="sub-title">Vos données sont chiffrées et sécurisées</p>
+    <div class="stripe-badge">⚡ Powered by <strong>Stripe</strong> — PCI DSS compliant</div>
+    <div class="form-group"><label>Nom complet</label><input type="text" placeholder="Jean Bousquet" id="payName"></div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="jean@lozere.fr" id="payEmail"></div>
+    <div class="form-group"><label>Adresse</label><input type="text" placeholder="12 rue des Cévennes" id="payAddress"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Ville</label><input type="text" placeholder="Mende" id="payCity"></div>
+      <div class="form-group"><label>Code postal</label><input type="text" placeholder="48000" id="payZip"></div>
+    </div>
+    <div class="form-group"><label>Pays</label><input type="text" placeholder="FR" id="payCountry" value="FR"></div>
+    <div class="stripe-info">🔒 Paiement traité de façon sécurisée par Stripe</div>
+    <div id="stripe-card-element" style="border:2px solid #e0e0e0;border-radius:10px;padding:14px;margin-bottom:1rem;"></div>
+    <button class="pay-btn" onclick="processPayment()" id="payBtn">Payer <span id="payAmount"></span></button>
+    <button class="modal-cancel" onclick="closeCheckout()">✕ Fermer</button>
+  </div>
+  <div class="modal" id="successModal" style="display:none">
+    <div class="success-screen">
+      <div class="s-icon">🏔️</div>
+      <h2>Commande confirmée !</h2>
+      <p>Merci ! Votre commande a été transmise à <strong>Printful</strong> pour production.<br><br>Vous recevrez un email de suivi sous 24h. Le 48 vous remercie ! 🐂</p>
+      <button class="pay-btn" style="margin-top:1.5rem" onclick="orderDone()">Retour à la boutique</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STRIPE_PUBLIC_KEY = 'pk_live_51T6zYSFkD773xqpJxzrns5ODDh6CpcQXlYJV0c7h8eLgz0p6j2kTmuwG9E8orarySOujoGyA0BqjcszjYPuhX6v000GbWQnQWx
+'; // pk_live_...
+
+const sportProducts = [
+  {id:1,name:"T-shirt Trail Aubrac",desc:"Technique respirant — conquête du plateau",price:34.90,emoji:"👕",bg:"s1",badge:true},
+  {id:2,name:"Hoodie Running Margeride",desc:"Légèreté & chaleur pour les sorties fraîches",price:54.90,emoji:"🧥",bg:"s2",badge:false},
+  {id:3,name:"Short Trail Cévennes",desc:"Liberté de mouvement, design 48",price:39.90,emoji:"🩳",bg:"s3",badge:true},
+  {id:4,name:"Legging Mont Lozère",desc:"Compression & confort sur tous les terrains",price:49.90,emoji:"🩱",bg:"s4",badge:false},
+];
+const lifestyleProducts = [
+  {id:5,name:"T-shirt Taureau d'Aubrac",desc:"L'emblème du 48 brodé sur ta poitrine",price:29.90,emoji:"🐂",bg:"l1",badge:true},
+  {id:6,name:"Sweat Vautour Fauve",desc:"Le roi des Cévennes, style urbain",price:54.90,emoji:"🦅",bg:"l2",badge:false},
+  {id:7,name:"Casquette Gorges du Tarn",desc:"Le 48 en toute décontraction",price:24.90,emoji:"🧢",bg:"l3",badge:false},
+  {id:8,name:"Hoodie Ciel Étoilé",desc:"N°1 réserve ciel étoilé — nuit lozérienne",price:59.90,emoji:"🌌",bg:"l4",badge:true},
+];
+
+let cart=[], stripe=null, cardElement=null;
+
+function renderGrid(products, containerId, type) {
+  document.getElementById(containerId).innerHTML = products.map(p=>`
+    <div class="prod-card">
+      <div class="prod-img ${p.bg}">${p.emoji}${p.badge?`<span class="badge-new ${type}">NEW</span>`:''}</div>
+      <div class="prod-info">
+        <h3>${p.name}</h3>
+        <p class="sub">${p.desc}</p>
+        <div class="prod-footer">
+          <span class="price ${type}">${p.price.toFixed(2)} €</span>
+          <button class="add-btn ${type}" onclick="addToCart(${p.id})">+ Ajouter</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addToCart(id) {
+  const all=[...sportProducts,...lifestyleProducts];
+  const p=all.find(x=>x.id===id);
+  const ex=cart.find(x=>x.id===id);
+  if(ex) ex.qty++; else cart.push({...p,qty:1});
+  updateCartUI();
+  showToast(`${p.emoji} ${p.name} ajouté !`);
+}
+
+function removeFromCart(id){cart=cart.filter(x=>x.id!==id);updateCartUI();}
+
+function changeQty(id,d){
+  const i=cart.find(x=>x.id===id);
+  if(!i)return;
+  i.qty+=d;
+  if(i.qty<=0)removeFromCart(id); else updateCartUI();
+}
+
+function updateCartUI(){
+  const total=cart.reduce((s,x)=>s+x.price*x.qty,0);
+  const count=cart.reduce((s,x)=>s+x.qty,0);
+  document.getElementById("cartCount").textContent=count;
+  const itemsEl=document.getElementById("cartItems");
+  const footerEl=document.getElementById("cartFooter");
+  if(cart.length===0){
+    itemsEl.innerHTML=`<div class="cart-empty"><div style="font-size:3rem">🏔️</div><p style="margin-top:1rem;color:#aaa">Votre panier est vide</p></div>`;
+    footerEl.style.display="none";
+  } else {
+    itemsEl.innerHTML=cart.map(x=>`
+      <div class="cart-item">
+        <div class="cart-item-img">${x.emoji}</div>
+        <div class="cart-item-info">
+          <h4>${x.name}</h4>
+          <p>${x.desc}</p>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty(${x.id},-1)">−</button>
+            <span class="qty-num">${x.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${x.id},1)">+</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span style="font-weight:800;color:var(--mousse)">${(x.price*x.qty).toFixed(2)} €</span>
+          <button class="remove-btn" onclick="removeFromCart(${x.id})">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+    footerEl.style.display="block";
+    document.getElementById("cartTotal").textContent=total.toFixed(2)+" €";
+  }
+}
+
+function toggleCart(){
+  document.getElementById("cartOverlay").classList.toggle("open");
+  document.getElementById("cartPanel").classList.toggle("open");
+}
+
+function openCheckout(){
+  if(cart.length===0)return;
+  const total=cart.reduce((s,x)=>s+x.price*x.qty,0);
+  document.getElementById("payAmount").textContent=total.toFixed(2)+" €";
+  document.getElementById("checkoutForm").style.display="block";
+  document.getElementById("successModal").style.display="none";
+  document.getElementById("checkoutModal").classList.add("open");
+  toggleCart();
+  // Init Stripe
+  if(!stripe){
+    stripe=Stripe(STRIPE_PUBLIC_KEY);
+    const elements=stripe.elements();
+    cardElement=elements.create('card',{style:{base:{fontSize:'16px',color:'#1e1a17'}}});
+    cardElement.mount('#stripe-card-element');
+  }
+}
+
+function closeCheckout(){document.getElementById("checkoutModal").classList.remove("open");}
+
+async function processPayment(){
+  const name=document.getElementById("payName").value;
+  const email=document.getElementById("payEmail").value;
+  const address=document.getElementById("payAddress").value;
+  const city=document.getElementById("payCity").value;
+  const zip=document.getElementById("payZip").value;
+  const country=document.getElementById("payCountry").value;
+  if(!name||!email||!address||!city||!zip){showToast("⚠️ Remplissez tous les champs");return;}
+
+  const btn=document.getElementById("payBtn");
+  btn.textContent="⏳ Traitement...";btn.disabled=true;
+
+  try {
+    const total=cart.reduce((s,x)=>s+x.price*x.qty,0);
+    // 1. Créer PaymentIntent via notre backend Vercel
+    const piRes=await fetch('/api/create-payment',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({amount:total,items:cart})
+    });
+    const {clientSecret}=await piRes.json();
+
+    // 2. Confirmer le paiement avec Stripe
+    const {error,paymentIntent}=await stripe.confirmCardPayment(clientSecret,{
+      payment_method:{card:cardElement,billing_details:{name,email}}
+    });
+
+    if(error){showToast("❌ "+error.message);btn.textContent="Payer";btn.disabled=false;return;}
+
+    // 3. Créer commande Printful
+    await fetch('/api/create-order',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,email,address:{line1:address,city,country,zip},items:cart})
+    });
+
+    document.getElementById("checkoutForm").style.display="none";
+    document.getElementById("successModal").style.display="block";
+  } catch(err){
+    showToast("❌ Erreur: "+err.message);
+    btn.textContent="Payer";btn.disabled=false;
+  }
+}
+
+function orderDone(){cart=[];updateCartUI();closeCheckout();showToast("🏔️ Merci, le 48 vous salue !");}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
+
+// Charger les produits depuis Printful
+async function loadProducts() {
+  try {
+    const res = await fetch('/api/get-products');
+    const data = await res.json();
+    if (!data.products) throw new Error('Pas de produits');
+
+    // Séparer sport et lifestyle (les 2 premiers = sport, les 2 derniers = lifestyle)
+    const sport = data.products.slice(0, 2);
+    const lifestyle = data.products.slice(2);
+
+    renderPrintfulGrid(sport, 'sportGrid', 'sport');
+    renderPrintfulGrid(lifestyle, 'lifestyleGrid', 'lifestyle');
+  } catch(err) {
+    console.error('Erreur chargement produits:', err);
+    // Fallback sur les produits statiques
+    renderGrid(sportProducts,'sportGrid','sport');
+    renderGrid(lifestyleProducts,'lifestyleGrid','lifestyle');
+  }
+  updateCartUI();
+}
+
+function renderPrintfulGrid(products, containerId, type) {
+  document.getElementById(containerId).innerHTML = products.map(p => {
+    const prices = p.variants.map(v => parseFloat(v.price));
+    const minPrice = Math.min(...prices).toFixed(2);
+    const sizes = [...new Set(p.variants.map(v => v.size).filter(Boolean))];
+
+    return `
+      <div class="prod-card">
+        <div class="prod-img" style="background:#f0ebe3;padding:1rem">
+          <img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;border-radius:8px">
+        </div>
+        <div class="prod-info">
+          <h3>${p.name}</h3>
+          <p class="sub">Lozère 48 — Imprimé à la demande</p>
+          <div style="margin-bottom:10px">
+            <select id="size-${p.id}" style="width:100%;padding:6px 10px;border:2px solid #e0e0e0;border-radius:8px;font-size:0.85rem;outline:none">
+              <option value="">Choisir une taille</option>
+              ${sizes.map(s => `<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="prod-footer">
+            <span class="price ${type}">À partir de ${minPrice} €</span>
+            <button class="add-btn ${type}" onclick="addPrintfulToCart(${JSON.stringify(p).replace(/"/g, '&quot;')}, '${type}')">+ Ajouter</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addPrintfulToCart(product, type) {
+  const sizeEl = document.getElementById(`size-${product.id}`);
+  const size = sizeEl ? sizeEl.value : '';
+  if (!size) { showToast('⚠️ Choisissez une taille !'); return; }
+
+  const variant = product.variants.find(v => v.size === size);
+  if (!variant) { showToast('⚠️ Variante introuvable'); return; }
+
+  const existing = cart.find(x => x.variantId === variant.id);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({
+      id: variant.id,
+      variantId: variant.id,
+      productId: product.id,
+      name: product.name,
+      desc: `Taille ${size}`,
+      price: parseFloat(variant.price),
+      emoji: type === 'sport' ? '👕' : '🐂',
+      qty: 1,
+      size,
+    });
+  }
+  updateCartUI();
+  showToast(`✅ ${product.name} (${size}) ajouté !`);
+}
+
+loadProducts();
+</script>
+</body>
+</html>
