@@ -446,13 +446,13 @@ async function loadProducts() {
     const sport = data.products.slice(0, 2);
     const lifestyle = data.products.slice(2);
 
-    renderPrintfulGrid(sport, 'sportGrid', 'sport');
-    renderPrintfulGrid(lifestyle, 'lifestyleGrid', 'lifestyle');
+  renderPrintfulGridAndStore(sport, 'sportGrid', 'sport');
+  renderPrintfulGridAndStore(lifestyle, 'lifestyleGrid', 'lifestyle');
   } catch(err) {
     console.error('Erreur chargement produits:', err);
     // Fallback sur les produits statiques
-    renderGrid(sportProducts,'sportGrid','sport');
-    renderGrid(lifestyleProducts,'lifestyleGrid','lifestyle');
+    renderPrintfulGridAndStore(sport, 'sportGrid', 'sport');
+    renderPrintfulGridAndStore(lifestyle, 'lifestyleGrid', 'lifestyle');
   }
   updateCartUI();
 }
