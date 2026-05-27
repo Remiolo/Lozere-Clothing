@@ -58,17 +58,6 @@
   .prod-card{background:white;border-radius:18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);transition:all .3s;border:1px solid #e8e0d5;}
   .prod-card:hover{transform:translateY(-4px);box-shadow:0 14px 35px rgba(0,0,0,.12);}
   .prod-img{height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;}
-  .prod-img.s1{background:linear-gradient(135deg,#d9e8d3,#b8d4b0);}
-  .prod-img.s2{background:linear-gradient(135deg,#cddbe8,#a8c4da);}
-  .prod-img.s3{background:linear-gradient(135deg,#d3e8e3,#b0d4cc);}
-  .prod-img.s4{background:linear-gradient(135deg,#dde3d9,#c0ccbb);}
-  .prod-img.l1{background:linear-gradient(135deg,#e8ddd3,#d4c4b0);}
-  .prod-img.l2{background:linear-gradient(135deg,#e8d3cb,#d4b0a8);}
-  .prod-img.l3{background:linear-gradient(135deg,#e8e3d3,#d4ccb0);}
-  .prod-img.l4{background:linear-gradient(135deg,#e3d3e8,#ccb0d4);}
-  .badge-new{position:absolute;top:10px;right:10px;color:white;font-size:0.7rem;font-weight:800;padding:3px 10px;border-radius:10px;letter-spacing:1px;}
-  .badge-new.sport{background:var(--mousse);}
-  .badge-new.lifestyle{background:var(--orange);}
   .prod-info{padding:1.1rem;}
   .prod-info h3{font-size:1rem;font-weight:800;margin-bottom:3px;}
   .prod-info .sub{color:#888;font-size:0.8rem;margin-bottom:10px;font-style:italic;}
@@ -201,7 +190,7 @@
     <p>Des vêtements techniques pour affronter les terrains lozériens</p>
   </div>
   <div class="prod-section">
-    <div class="prod-grid" id="sportGrid"></div>
+    <div class="prod-grid" id="sportGrid"><p style="text-align:center;color:#aaa;padding:2rem">Chargement des produits...</p></div>
   </div>
 </div>
 
@@ -214,7 +203,7 @@
     <p>Porter l'identité du 48 au quotidien, partout dans le monde</p>
   </div>
   <div class="prod-section" style="background:white;">
-    <div class="prod-grid" id="lifestyleGrid"></div>
+    <div class="prod-grid" id="lifestyleGrid"><p style="text-align:center;color:#aaa;padding:2rem">Chargement des produits...</p></div>
   </div>
 </div>
 
@@ -279,240 +268,220 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const STRIPE_PUBLIC_KEY = 'pk_live_51T6zYSFkD773xqpJxzrns5ODDh6CpcQXlYJV0c7h8eLgz0p6j2kTmuwG9E8orarySOujoGyA0BqjcszjYPuhX6v000GbWQnQWx
-'; // pk_live_...
+// ⚠️ Remplacez par votre vraie clé publique Stripe (sans saut de ligne)
+const STRIPE_PUBLIC_KEY = 'pk_live_51T6zYSFkD773xqpJxzrns5ODDh6CpcQXlYJV0c7h8eLgz0p6j2kTmuwG9E8orarySOujoGyA0BqjcszjYPuhX6v000GbWQnQWx';
 
-const sportProducts = [
-  {id:1,name:"T-shirt Trail Aubrac",desc:"Technique respirant — conquête du plateau",price:34.90,emoji:"👕",bg:"s1",badge:true},
-  {id:2,name:"Hoodie Running Margeride",desc:"Légèreté & chaleur pour les sorties fraîches",price:54.90,emoji:"🧥",bg:"s2",badge:false},
-  {id:3,name:"Short Trail Cévennes",desc:"Liberté de mouvement, design 48",price:39.90,emoji:"🩳",bg:"s3",badge:true},
-  {id:4,name:"Legging Mont Lozère",desc:"Compression & confort sur tous les terrains",price:49.90,emoji:"🩱",bg:"s4",badge:false},
-];
-const lifestyleProducts = [
-  {id:5,name:"T-shirt Taureau d'Aubrac",desc:"L'emblème du 48 brodé sur ta poitrine",price:29.90,emoji:"🐂",bg:"l1",badge:true},
-  {id:6,name:"Sweat Vautour Fauve",desc:"Le roi des Cévennes, style urbain",price:54.90,emoji:"🦅",bg:"l2",badge:false},
-  {id:7,name:"Casquette Gorges du Tarn",desc:"Le 48 en toute décontraction",price:24.90,emoji:"🧢",bg:"l3",badge:false},
-  {id:8,name:"Hoodie Ciel Étoilé",desc:"N°1 réserve ciel étoilé — nuit lozérienne",price:59.90,emoji:"🌌",bg:"l4",badge:true},
-];
+let cart = [], stripe = null, cardElement = null;
+const _products = {}; // stockage global des produits Printful
 
-let cart=[], stripe=null, cardElement=null;
+// ─── Rendu des produits ───────────────────────────────────────────────────────
 
-function renderGrid(products, containerId, type) {
-  document.getElementById(containerId).innerHTML = products.map(p=>`
-    <div class="prod-card">
-      <div class="prod-img ${p.bg}">${p.emoji}${p.badge?`<span class="badge-new ${type}">NEW</span>`:''}</div>
-      <div class="prod-info">
-        <h3>${p.name}</h3>
-        <p class="sub">${p.desc}</p>
-        <div class="prod-footer">
-          <span class="price ${type}">${p.price.toFixed(2)} €</span>
-          <button class="add-btn ${type}" onclick="addToCart(${p.id})">+ Ajouter</button>
+function renderPrintfulGridAndStore(products, containerId, type) {
+  products.forEach(p => _products[p.id] = p);
+  const el = document.getElementById(containerId);
+  if (!products.length) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:2rem">Aucun produit disponible</p>'; return; }
+
+  el.innerHTML = products.map(p => {
+    const minPrice = Math.min(...p.variants.map(v => parseFloat(v.price))).toFixed(2);
+    const colors = [...new Set(p.variants.map(v => v.color).filter(Boolean))];
+    const hasColors = colors.length > 1;
+
+    return `
+      <div class="prod-card">
+        <div class="prod-img" style="background:#f0ebe3;padding:1rem;height:200px">
+          <img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;border-radius:8px">
         </div>
-      </div>
-    </div>
-  `).join('');
+        <div class="prod-info">
+          <h3>${p.name}</h3>
+          <p class="sub">Lozère 48 — Imprimé à la demande</p>
+          ${hasColors ? `
+          <select id="color-${p.id}" onchange="updateSizes(${p.id})"
+            style="width:100%;padding:6px 10px;border:2px solid #e0e0e0;border-radius:8px;font-size:0.85rem;outline:none;margin-bottom:6px">
+            <option value="">🎨 Choisir une couleur</option>
+            ${colors.map(c => `<option value="${c}">${c}</option>`).join('')}
+          </select>` : ''}
+          <select id="size-${p.id}"
+            style="width:100%;padding:6px 10px;border:2px solid #e0e0e0;border-radius:8px;font-size:0.85rem;outline:none;margin-bottom:10px">
+            <option value="">📐 Choisir une taille</option>
+            ${!hasColors ? p.variants.map(v => `<option value="${v.size}">${v.size}</option>`).join('') : ''}
+          </select>
+          <div class="prod-footer">
+            <span class="price ${type}">À partir de ${minPrice} €</span>
+            <button class="add-btn ${type}" onclick="addPrintfulToCart(${p.id}, '${type}')">+ Ajouter</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
-function addToCart(id) {
-  const all=[...sportProducts,...lifestyleProducts];
-  const p=all.find(x=>x.id===id);
-  const ex=cart.find(x=>x.id===id);
-  if(ex) ex.qty++; else cart.push({...p,qty:1});
+function updateSizes(productId) {
+  const p = _products[productId];
+  if (!p) return;
+  const color = document.getElementById(`color-${productId}`)?.value;
+  const sizeEl = document.getElementById(`size-${productId}`);
+  const filtered = color ? p.variants.filter(v => v.color === color) : p.variants;
+  const sizes = [...new Set(filtered.map(v => v.size).filter(Boolean))];
+  sizeEl.innerHTML = `<option value="">📐 Choisir une taille</option>` + sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+function addPrintfulToCart(productId, type) {
+  const p = _products[productId];
+  if (!p) return;
+  const colorEl = document.getElementById(`color-${productId}`);
+  const color = colorEl ? colorEl.value : null;
+  const size = document.getElementById(`size-${productId}`)?.value;
+  const colors = [...new Set(p.variants.map(v => v.color).filter(Boolean))];
+
+  if (colors.length > 1 && !color) { showToast('⚠️ Choisissez une couleur !'); return; }
+  if (!size) { showToast('⚠️ Choisissez une taille !'); return; }
+
+  const variant = p.variants.find(v => v.size === size && (colors.length <= 1 || v.color === color));
+  if (!variant) { showToast('⚠️ Variante introuvable'); return; }
+
+  const existing = cart.find(x => x.variantId === variant.id);
+  if (existing) { existing.qty++; }
+  else {
+    cart.push({
+      id: variant.id, variantId: variant.id, productId: p.id,
+      name: p.name, desc: [color, size].filter(Boolean).join(' / '),
+      price: parseFloat(variant.price),
+      emoji: type === 'sport' ? '👕' : '🐂', qty: 1, size, color,
+    });
+  }
   updateCartUI();
-  showToast(`${p.emoji} ${p.name} ajouté !`);
+  showToast(`✅ ${p.name} (${[color, size].filter(Boolean).join(' / ')}) ajouté !`);
 }
 
-function removeFromCart(id){cart=cart.filter(x=>x.id!==id);updateCartUI();}
+// ─── Panier ───────────────────────────────────────────────────────────────────
 
-function changeQty(id,d){
-  const i=cart.find(x=>x.id===id);
-  if(!i)return;
-  i.qty+=d;
-  if(i.qty<=0)removeFromCart(id); else updateCartUI();
+function removeFromCart(id) { cart = cart.filter(x => x.variantId !== id); updateCartUI(); }
+
+function changeQty(id, d) {
+  const item = cart.find(x => x.variantId === id);
+  if (!item) return;
+  item.qty += d;
+  if (item.qty <= 0) removeFromCart(id); else updateCartUI();
 }
 
-function updateCartUI(){
-  const total=cart.reduce((s,x)=>s+x.price*x.qty,0);
-  const count=cart.reduce((s,x)=>s+x.qty,0);
-  document.getElementById("cartCount").textContent=count;
-  const itemsEl=document.getElementById("cartItems");
-  const footerEl=document.getElementById("cartFooter");
-  if(cart.length===0){
-    itemsEl.innerHTML=`<div class="cart-empty"><div style="font-size:3rem">🏔️</div><p style="margin-top:1rem;color:#aaa">Votre panier est vide</p></div>`;
-    footerEl.style.display="none";
+function updateCartUI() {
+  const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
+  const count = cart.reduce((s, x) => s + x.qty, 0);
+  document.getElementById('cartCount').textContent = count;
+  const itemsEl = document.getElementById('cartItems');
+  const footerEl = document.getElementById('cartFooter');
+  if (!cart.length) {
+    itemsEl.innerHTML = `<div class="cart-empty"><div style="font-size:3rem">🏔️</div><p style="margin-top:1rem;color:#aaa">Votre panier est vide</p></div>`;
+    footerEl.style.display = 'none';
   } else {
-    itemsEl.innerHTML=cart.map(x=>`
+    itemsEl.innerHTML = cart.map(x => `
       <div class="cart-item">
         <div class="cart-item-img">${x.emoji}</div>
         <div class="cart-item-info">
           <h4>${x.name}</h4>
           <p>${x.desc}</p>
           <div class="qty-ctrl">
-            <button class="qty-btn" onclick="changeQty(${x.id},-1)">−</button>
+            <button class="qty-btn" onclick="changeQty(${x.variantId},-1)">−</button>
             <span class="qty-num">${x.qty}</span>
-            <button class="qty-btn" onclick="changeQty(${x.id},1)">+</button>
+            <button class="qty-btn" onclick="changeQty(${x.variantId},1)">+</button>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
           <span style="font-weight:800;color:var(--mousse)">${(x.price*x.qty).toFixed(2)} €</span>
-          <button class="remove-btn" onclick="removeFromCart(${x.id})">🗑️</button>
+          <button class="remove-btn" onclick="removeFromCart(${x.variantId})">🗑️</button>
         </div>
-      </div>
-    `).join('');
-    footerEl.style.display="block";
-    document.getElementById("cartTotal").textContent=total.toFixed(2)+" €";
+      </div>`).join('');
+    footerEl.style.display = 'block';
+    document.getElementById('cartTotal').textContent = total.toFixed(2) + ' €';
   }
 }
 
-function toggleCart(){
-  document.getElementById("cartOverlay").classList.toggle("open");
-  document.getElementById("cartPanel").classList.toggle("open");
+function toggleCart() {
+  document.getElementById('cartOverlay').classList.toggle('open');
+  document.getElementById('cartPanel').classList.toggle('open');
 }
 
-function openCheckout(){
-  if(cart.length===0)return;
-  const total=cart.reduce((s,x)=>s+x.price*x.qty,0);
-  document.getElementById("payAmount").textContent=total.toFixed(2)+" €";
-  document.getElementById("checkoutForm").style.display="block";
-  document.getElementById("successModal").style.display="none";
-  document.getElementById("checkoutModal").classList.add("open");
+// ─── Paiement ─────────────────────────────────────────────────────────────────
+
+function openCheckout() {
+  if (!cart.length) return;
+  const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
+  document.getElementById('payAmount').textContent = total.toFixed(2) + ' €';
+  document.getElementById('checkoutForm').style.display = 'block';
+  document.getElementById('successModal').style.display = 'none';
+  document.getElementById('checkoutModal').classList.add('open');
   toggleCart();
-  // Init Stripe
-  if(!stripe){
-    stripe=Stripe(STRIPE_PUBLIC_KEY);
-    const elements=stripe.elements();
-    cardElement=elements.create('card',{style:{base:{fontSize:'16px',color:'#1e1a17'}}});
+  if (!stripe) {
+    stripe = Stripe(STRIPE_PUBLIC_KEY);
+    const elements = stripe.elements();
+    cardElement = elements.create('card', { style: { base: { fontSize: '16px', color: '#1e1a17' } } });
     cardElement.mount('#stripe-card-element');
   }
 }
 
-function closeCheckout(){document.getElementById("checkoutModal").classList.remove("open");}
+function closeCheckout() { document.getElementById('checkoutModal').classList.remove('open'); }
 
-async function processPayment(){
-  const name=document.getElementById("payName").value;
-  const email=document.getElementById("payEmail").value;
-  const address=document.getElementById("payAddress").value;
-  const city=document.getElementById("payCity").value;
-  const zip=document.getElementById("payZip").value;
-  const country=document.getElementById("payCountry").value;
-  if(!name||!email||!address||!city||!zip){showToast("⚠️ Remplissez tous les champs");return;}
+async function processPayment() {
+  const name = document.getElementById('payName').value;
+  const email = document.getElementById('payEmail').value;
+  const address = document.getElementById('payAddress').value;
+  const city = document.getElementById('payCity').value;
+  const zip = document.getElementById('payZip').value;
+  const country = document.getElementById('payCountry').value;
+  if (!name || !email || !address || !city || !zip) { showToast('⚠️ Remplissez tous les champs'); return; }
 
-  const btn=document.getElementById("payBtn");
-  btn.textContent="⏳ Traitement...";btn.disabled=true;
+  const btn = document.getElementById('payBtn');
+  btn.textContent = '⏳ Traitement...'; btn.disabled = true;
 
   try {
-    const total=cart.reduce((s,x)=>s+x.price*x.qty,0);
-    // 1. Créer PaymentIntent via notre backend Vercel
-    const piRes=await fetch('/api/create-payment',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({amount:total,items:cart})
+    const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
+    const piRes = await fetch('/api/create-payment', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: total, items: cart })
     });
-    const {clientSecret}=await piRes.json();
-
-    // 2. Confirmer le paiement avec Stripe
-    const {error,paymentIntent}=await stripe.confirmCardPayment(clientSecret,{
-      payment_method:{card:cardElement,billing_details:{name,email}}
+    const { clientSecret } = await piRes.json();
+    const { error } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: { card: cardElement, billing_details: { name, email } }
     });
+    if (error) { showToast('❌ ' + error.message); btn.textContent = 'Payer'; btn.disabled = false; return; }
 
-    if(error){showToast("❌ "+error.message);btn.textContent="Payer";btn.disabled=false;return;}
-
-    // 3. Créer commande Printful
-    await fetch('/api/create-order',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name,email,address:{line1:address,city,country,zip},items:cart})
+    await fetch('/api/create-order', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, address: { line1: address, city, country, zip }, items: cart })
     });
 
-    document.getElementById("checkoutForm").style.display="none";
-    document.getElementById("successModal").style.display="block";
-  } catch(err){
-    showToast("❌ Erreur: "+err.message);
-    btn.textContent="Payer";btn.disabled=false;
+    document.getElementById('checkoutForm').style.display = 'none';
+    document.getElementById('successModal').style.display = 'block';
+  } catch (err) {
+    showToast('❌ Erreur: ' + err.message);
+    btn.textContent = 'Payer'; btn.disabled = false;
   }
 }
 
-function orderDone(){cart=[];updateCartUI();closeCheckout();showToast("🏔️ Merci, le 48 vous salue !");}
-function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
+function orderDone() { cart = []; updateCartUI(); closeCheckout(); showToast('🏔️ Merci, le 48 vous salue !'); }
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
 
-// Charger les produits depuis Printful
+// ─── Chargement Printful ──────────────────────────────────────────────────────
+
 async function loadProducts() {
   try {
     const res = await fetch('/api/get-products');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    if (!data.products) throw new Error('Pas de produits');
+    if (!data.products?.length) throw new Error('Pas de produits');
 
-    // Séparer sport et lifestyle (les 2 premiers = sport, les 2 derniers = lifestyle)
+    // Les 2 premiers produits → Sport, le reste → Lifestyle
+    // Ajustez ce découpage selon votre boutique Printful
     const sport = data.products.slice(0, 2);
     const lifestyle = data.products.slice(2);
 
-  renderPrintfulGridAndStore(sport, 'sportGrid', 'sport');
-  renderPrintfulGridAndStore(lifestyle, 'lifestyleGrid', 'lifestyle');
-  } catch(err) {
-    console.error('Erreur chargement produits:', err);
-    // Fallback sur les produits statiques
     renderPrintfulGridAndStore(sport, 'sportGrid', 'sport');
     renderPrintfulGridAndStore(lifestyle, 'lifestyleGrid', 'lifestyle');
+  } catch (err) {
+    console.error('Erreur chargement produits:', err);
+    document.getElementById('sportGrid').innerHTML = '<p style="text-align:center;color:#e63946;padding:2rem">❌ Impossible de charger les produits. Réessayez.</p>';
+    document.getElementById('lifestyleGrid').innerHTML = '';
   }
   updateCartUI();
-}
-
-function renderPrintfulGrid(products, containerId, type) {
-  document.getElementById(containerId).innerHTML = products.map(p => {
-    const prices = p.variants.map(v => parseFloat(v.price));
-    const minPrice = Math.min(...prices).toFixed(2);
-    const sizes = [...new Set(p.variants.map(v => v.size).filter(Boolean))];
-
-    return `
-      <div class="prod-card">
-        <div class="prod-img" style="background:#f0ebe3;padding:1rem">
-          <img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;border-radius:8px">
-        </div>
-        <div class="prod-info">
-          <h3>${p.name}</h3>
-          <p class="sub">Lozère 48 — Imprimé à la demande</p>
-          <div style="margin-bottom:10px">
-            <select id="size-${p.id}" style="width:100%;padding:6px 10px;border:2px solid #e0e0e0;border-radius:8px;font-size:0.85rem;outline:none">
-              <option value="">Choisir une taille</option>
-              ${sizes.map(s => `<option value="${s}">${s}</option>`).join('')}
-            </select>
-          </div>
-          <div class="prod-footer">
-            <span class="price ${type}">À partir de ${minPrice} €</span>
-            <button class="add-btn ${type}" onclick="addPrintfulToCart(${JSON.stringify(p).replace(/"/g, '&quot;')}, '${type}')">+ Ajouter</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function addPrintfulToCart(product, type) {
-  const sizeEl = document.getElementById(`size-${product.id}`);
-  const size = sizeEl ? sizeEl.value : '';
-  if (!size) { showToast('⚠️ Choisissez une taille !'); return; }
-
-  const variant = product.variants.find(v => v.size === size);
-  if (!variant) { showToast('⚠️ Variante introuvable'); return; }
-
-  const existing = cart.find(x => x.variantId === variant.id);
-  if (existing) {
-    existing.qty++;
-  } else {
-    cart.push({
-      id: variant.id,
-      variantId: variant.id,
-      productId: product.id,
-      name: product.name,
-      desc: `Taille ${size}`,
-      price: parseFloat(variant.price),
-      emoji: type === 'sport' ? '👕' : '🐂',
-      qty: 1,
-      size,
-    });
-  }
-  updateCartUI();
-  showToast(`✅ ${product.name} (${size}) ajouté !`);
 }
 
 loadProducts();
