@@ -272,7 +272,7 @@ const _products = {};
 // ─── Rendu produits ───────────────────────────────────────────────────────────
 
 function renderPrintfulGridAndStore(products, containerId, type) {
-  products.forEach(p => _products[p.id] = p);
+  products.forEach(p => { _products[p.id] = p; _products[p.id]._type = type; });
   const el = document.getElementById(containerId);
   if (!products.length) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:2rem">Aucun produit disponible</p>'; return; }
 
@@ -292,11 +292,11 @@ function renderPrintfulGridAndStore(products, containerId, type) {
 
     return `
       <div class="prod-card">
-        <div style="position:relative;background:#f7f3ee;border-radius:20px 20px 0 0;overflow:hidden;height:280px;display:flex;align-items:center;justify-content:center;">
+        <div style="position:relative;background:#ffffff;border-radius:20px 20px 0 0;overflow:hidden;height:280px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #f0ebe0">
           <img id="img-${p.id}" src="${p.image}" alt="${p.name}"
             style="width:100%;height:100%;object-fit:contain;padding:1.2rem;transition:opacity .25s">
           <div style="position:absolute;top:12px;left:12px;background:${accentColor};color:white;font-size:0.65rem;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:1px;text-transform:uppercase">
-            ${type === 'sport' ? '🏃 Sport' : '🐂 Lifestyle'}
+            ${type === 'sport' ? '🏃 Sport' : '👕 Lifestyle'}
           </div>
         </div>
         <div style="padding:1.4rem">
@@ -383,7 +383,8 @@ function selectSize(productId, size) {
     btn.style.background = 'white'; btn.style.color = '#666'; btn.style.borderColor = '#e0e0e0';
   });
   const sel = document.getElementById(`sizeBtn-${productId}-${size}`);
-  if (sel) { sel.style.background = 'var(--dark)'; sel.style.color = 'white'; sel.style.borderColor = 'var(--dark)'; }
+  const accent = p._type === 'sport' ? 'var(--mousse)' : 'var(--orange)';
+  if (sel) { sel.style.background = accent; sel.style.color = 'white'; sel.style.borderColor = 'transparent'; }
   document.getElementById(`sizeLabel-${productId}`).textContent = size;
   _products[productId]._selectedSize = size;
   const color = p._selectedColor;
@@ -524,8 +525,8 @@ async function loadProducts() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (!data.products?.length) throw new Error('Pas de produits');
-    const sport = data.products.slice(0, 2);
-    const lifestyle = data.products.slice(2);
+    const sport = data.products.slice(0, 0);
+    const lifestyle = data.products.slice(0);
     renderPrintfulGridAndStore(sport, 'sportGrid', 'sport');
     renderPrintfulGridAndStore(lifestyle, 'lifestyleGrid', 'lifestyle');
   } catch (err) {
