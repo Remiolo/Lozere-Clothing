@@ -33,10 +33,10 @@
   .hero-sub{color:rgba(255,255,255,.65);font-size:1.05rem;margin-bottom:.5rem;font-style:italic;}
   .hero-tagline{color:rgba(255,255,255,.9);font-size:1.1rem;margin-bottom:2rem;font-weight:600;}
   .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
-  .btn-sport{background:var(--mousse);color:white;padding:14px 32px;border-radius:30px;font-weight:700;font-size:1rem;cursor:pointer;border:none;transition:all .2s;}
-  .btn-sport:hover{background:#3a5533;transform:translateY(-2px);}
-  .btn-lifestyle{background:var(--orange);color:white;padding:14px 32px;border-radius:30px;font-weight:700;font-size:1rem;cursor:pointer;border:none;transition:all .2s;}
-  .btn-lifestyle:hover{background:#b0521f;transform:translateY(-2px);}
+  .btn-primary{background:var(--mousse);color:white;padding:14px 32px;border-radius:30px;font-weight:700;font-size:1rem;cursor:pointer;border:none;transition:all .2s;}
+  .btn-primary:hover{background:#3a5533;transform:translateY(-2px);}
+  .btn-secondary{background:var(--orange);color:white;padding:14px 32px;border-radius:30px;font-weight:700;font-size:1rem;cursor:pointer;border:none;transition:all .2s;}
+  .btn-secondary:hover{background:#b0521f;transform:translateY(-2px);}
 
   .spirit-band{background:var(--granite);color:rgba(255,255,255,.6);display:flex;justify-content:center;gap:3rem;padding:14px 2rem;font-size:0.82rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;flex-wrap:wrap;}
   .spirit-band span{display:flex;align-items:center;gap:6px;white-space:nowrap;}
@@ -53,23 +53,13 @@
   .section-header h2{font-size:2rem;font-weight:900;margin-bottom:.4rem;}
   .section-header p{color:#888;font-size:0.9rem;}
 
+  .coming-soon-banner{display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(201,98,47,.08);border:2px dashed rgba(201,98,47,.3);border-radius:16px;padding:18px 24px;margin:0 2rem 2rem;max-width:1100px;margin-left:auto;margin-right:auto;color:var(--orange);}
+  .coming-soon-banner span{font-weight:700;font-size:0.9rem;letter-spacing:1px;}
+
   .prod-section{padding:20px 2rem 60px;}
-  .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem;max-width:1100px;margin:0 auto;}
-  .prod-card{background:white;border-radius:18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);transition:all .3s;border:1px solid #e8e0d5;}
-  .prod-card:hover{transform:translateY(-4px);box-shadow:0 14px 35px rgba(0,0,0,.12);}
-  .prod-img{height:200px;display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;}
-  .prod-info{padding:1.1rem;}
-  .prod-info h3{font-size:1rem;font-weight:800;margin-bottom:3px;}
-  .prod-info .sub{color:#888;font-size:0.8rem;margin-bottom:10px;font-style:italic;}
-  .prod-footer{display:flex;align-items:center;justify-content:space-between;}
-  .price{font-size:1.2rem;font-weight:900;}
-  .price.sport{color:var(--mousse);}
-  .price.lifestyle{color:var(--orange);}
-  .add-btn{color:white;border:none;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:0.85rem;font-weight:700;transition:all .2s;}
-  .add-btn.sport{background:var(--mousse);}
-  .add-btn.sport:hover{background:#3a5533;transform:scale(1.05);}
-  .add-btn.lifestyle{background:var(--orange);}
-  .add-btn.lifestyle:hover{background:#b0521f;transform:scale(1.05);}
+  .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.8rem;max-width:1100px;margin:0 auto;}
+  .prod-card{background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.07);transition:all .3s;border:1px solid #ede8e0;}
+  .prod-card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,.12);}
 
   .section-divider{height:6px;background:linear-gradient(90deg,var(--mousse),var(--orange));}
 
@@ -142,8 +132,8 @@
 <nav>
   <div class="logo">LOZÈRE <span class="logo-48">48</span></div>
   <ul class="nav-links">
-    <li><a href="#sport">Coin Sport</a></li>
-    <li><a href="#lifestyle">Coin Lifestyle</a></li>
+    <li><a href="#sport">Sport</a></li>
+    <li><a href="#lifestyle">Lifestyle</a></li>
   </ul>
   <button class="cart-btn" onclick="toggleCart()">
     🛒 Panier <span class="cart-count" id="cartCount">0</span>
@@ -163,8 +153,8 @@
     <p class="hero-sub">Aubrac · Margeride · Cévennes · Gorges du Tarn</p>
     <p class="hero-tagline">Le merch du département le plus sauvage de France</p>
     <div class="hero-btns">
-      <button class="btn-sport" onclick="document.getElementById('sport').scrollIntoView({behavior:'smooth'})">🏃 Coin Sport</button>
-      <button class="btn-lifestyle" onclick="document.getElementById('lifestyle').scrollIntoView({behavior:'smooth'})">🐂 Coin Lifestyle</button>
+      <button class="btn-primary" onclick="document.getElementById('sport').scrollIntoView({behavior:'smooth'})">🏃 Sport</button>
+      <button class="btn-secondary" onclick="document.getElementById('lifestyle').scrollIntoView({behavior:'smooth'})">🐂 Lifestyle</button>
     </div>
   </div>
 </section>
@@ -179,31 +169,37 @@
 </div>
 
 <div class="shop-nav">
-  <button class="tab-btn active sport" id="tab-sport" onclick="document.getElementById('sport').scrollIntoView({behavior:'smooth'})">🏃 Coin Sport</button>
-  <button class="tab-btn lifestyle" id="tab-lifestyle" onclick="document.getElementById('lifestyle').scrollIntoView({behavior:'smooth'})">🐂 Coin Lifestyle</button>
+  <button class="tab-btn active sport" onclick="document.getElementById('sport').scrollIntoView({behavior:'smooth'})">🏃 Sport</button>
+  <button class="tab-btn lifestyle" onclick="document.getElementById('lifestyle').scrollIntoView({behavior:'smooth'})">🐂 Lifestyle</button>
 </div>
 
+<!-- SPORT -->
 <div id="sport">
   <div class="section-header">
-    <div class="label sport-label">🏃 Coin Sport</div>
+    <div class="label sport-label">🏃 Sport</div>
     <h2>Performance & Nature</h2>
     <p>Des vêtements techniques pour affronter les terrains lozériens</p>
   </div>
+  <div class="coming-soon-banner">
+    <span>⏳</span>
+    <span>Collection Sport — Bientôt disponible</span>
+  </div>
   <div class="prod-section">
-    <div class="prod-grid" id="sportGrid"><p style="text-align:center;color:#aaa;padding:2rem">Chargement des produits...</p></div>
+    <div class="prod-grid" id="sportGrid"><p style="text-align:center;color:#aaa;padding:2rem">Chargement...</p></div>
   </div>
 </div>
 
 <div class="section-divider"></div>
 
-<div id="lifestyle">
+<!-- LIFESTYLE -->
+<div id="lifestyle" style="background:white;">
   <div class="section-header" style="background:white;">
-    <div class="label lifestyle-label">🐂 Coin Lifestyle</div>
+    <div class="label lifestyle-label">🐂 Lifestyle</div>
     <h2>Fierté Lozérienne</h2>
     <p>Porter l'identité du 48 au quotidien, partout dans le monde</p>
   </div>
   <div class="prod-section" style="background:white;">
-    <div class="prod-grid" id="lifestyleGrid"><p style="text-align:center;color:#aaa;padding:2rem">Chargement des produits...</p></div>
+    <div class="prod-grid" id="lifestyleGrid"><p style="text-align:center;color:#aaa;padding:2rem">Chargement...</p></div>
   </div>
 </div>
 
@@ -268,96 +264,149 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ⚠️ Remplacez par votre vraie clé publique Stripe (sans saut de ligne)
 const STRIPE_PUBLIC_KEY = 'pk_live_51T6zYSFkD773xqpJxzrns5ODDh6CpcQXlYJV0c7h8eLgz0p6j2kTmuwG9E8orarySOujoGyA0BqjcszjYPuhX6v000GbWQnQWx';
 
 let cart = [], stripe = null, cardElement = null;
-const _products = {}; // stockage global des produits Printful
+const _products = {};
 
-// ─── Rendu des produits ───────────────────────────────────────────────────────
+// ─── Rendu produits ───────────────────────────────────────────────────────────
 
 function renderPrintfulGridAndStore(products, containerId, type) {
   products.forEach(p => _products[p.id] = p);
   const el = document.getElementById(containerId);
   if (!products.length) { el.innerHTML = '<p style="text-align:center;color:#aaa;padding:2rem">Aucun produit disponible</p>'; return; }
 
+  const colorMap = {
+    'White':'#ffffff','Black':'#1a1a1a','Lavender':'#b57edc','Sky Blue':'#87ceeb',
+    'Bone':'#e8dcc8','Lagoon Blue':'#4a90a4','Orchid':'#da70d6','Blossom':'#ffb7c5',
+    'Chambray':'#7a9db5','Ivory':'#fffff0','Graphite':'#6b6b6b','True Navy':'#1a2f5e',
+    'Sage':'#8faa7a','Brick':'#9c3d2e','Blue Spruce':'#2e6b5e','Espresso':'#3b1f0e',
+    'Light Green':'#90c47a',
+  };
+
   el.innerHTML = products.map(p => {
     const minPrice = Math.min(...p.variants.map(v => parseFloat(v.price))).toFixed(2);
     const colors = [...new Set(p.variants.map(v => v.color).filter(Boolean))];
     const hasColors = colors.length > 1;
+    const accentColor = type === 'sport' ? 'var(--mousse)' : 'var(--orange)';
 
     return `
       <div class="prod-card">
-        <div class="prod-img" style="background:#f0ebe3;padding:1rem;height:200px">
-        <img id="img-${p.id}" src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;border-radius:8px">
+        <div style="position:relative;background:#f7f3ee;border-radius:20px 20px 0 0;overflow:hidden;height:280px;display:flex;align-items:center;justify-content:center;">
+          <img id="img-${p.id}" src="${p.image}" alt="${p.name}"
+            style="width:100%;height:100%;object-fit:contain;padding:1.2rem;transition:opacity .25s">
+          <div style="position:absolute;top:12px;left:12px;background:${accentColor};color:white;font-size:0.65rem;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:1px;text-transform:uppercase">
+            ${type === 'sport' ? '🏃 Sport' : '🐂 Lifestyle'}
+          </div>
         </div>
-        <div class="prod-info">
-          <h3>${p.name}</h3>
-          <p class="sub">Lozère 48 — Imprimé à la demande</p>
+        <div style="padding:1.4rem">
+          <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:4px;color:var(--dark)">${p.name}</h3>
+          <p style="color:#aaa;font-size:0.78rem;margin-bottom:1.2rem;font-style:italic">Imprimé à la demande · Livraison mondiale</p>
+
           ${hasColors ? `
-          <select id="color-${p.id}" onchange="updateSizes(${p.id})"
-            style="width:100%;padding:6px 10px;border:2px solid #e0e0e0;border-radius:8px;font-size:0.85rem;outline:none;margin-bottom:6px">
-            <option value="">🎨 Choisir une couleur</option>
-            ${colors.map(c => `<option value="${c}">${c}</option>`).join('')}
-          </select>` : ''}
-          <select id="size-${p.id}"
-            style="width:100%;padding:6px 10px;border:2px solid #e0e0e0;border-radius:8px;font-size:0.85rem;outline:none;margin-bottom:10px">
-            <option value="">📐 Choisir une taille</option>
-            ${!hasColors ? p.variants.map(v => `<option value="${v.size}">${v.size}</option>`).join('') : ''}
-          </select>
-          <div class="prod-footer">
-            <span class="price ${type}">À partir de ${minPrice} €</span>
-            <button class="add-btn ${type}" onclick="addPrintfulToCart(${p.id}, '${type}')">+ Ajouter</button>
+          <div style="margin-bottom:1.1rem">
+            <p style="font-size:0.72rem;font-weight:700;color:#888;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">
+              Couleur : <span id="colorLabel-${p.id}" style="color:var(--dark);font-weight:900">—</span>
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:7px">
+              ${colors.map(c => `
+                <button onclick="selectColor(${p.id}, '${c}')" id="colorBtn-${p.id}-${c.replace(/\s/g,'_')}" title="${c}"
+                  style="width:28px;height:28px;border-radius:50%;border:2px solid #ddd;background:${colorMap[c]||'#ccc'};cursor:pointer;transition:all .2s;flex-shrink:0;${c==='White'||c==='Ivory'||c==='Bone'?'box-shadow:inset 0 0 0 1px #ccc':''}">
+                </button>`).join('')}
+            </div>
+          </div>` : ''}
+
+          <div style="margin-bottom:1.3rem">
+            <p style="font-size:0.72rem;font-weight:700;color:#888;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">
+              Taille : <span id="sizeLabel-${p.id}" style="color:var(--dark);font-weight:900">—</span>
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px" id="sizePicker-${p.id}">
+              ${!hasColors ? p.variants.map(v => `
+                <button onclick="selectSize(${p.id}, '${v.size}')" id="sizeBtn-${p.id}-${v.size}"
+                  style="padding:6px 13px;border-radius:8px;border:2px solid #e0e0e0;background:white;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all .2s;color:#666">
+                  ${v.size}
+                </button>`).join('') : ''}
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem">
+            <div>
+              <span style="font-size:1.35rem;font-weight:900;color:${accentColor}">
+                <span id="price-${p.id}">${minPrice}</span> €
+              </span>
+            </div>
+            <button onclick="addPrintfulToCart(${p.id}, '${type}')"
+              style="background:${accentColor};color:white;border:none;padding:11px 22px;border-radius:25px;font-weight:800;font-size:0.88rem;cursor:pointer;transition:all .2s"
+              onmouseover="this.style.opacity='.85';this.style.transform='translateY(-2px)'"
+              onmouseout="this.style.opacity='1';this.style.transform=''">
+              🛒 Ajouter
+            </button>
           </div>
         </div>
       </div>`;
   }).join('');
 }
 
-function updateSizes(productId) {
+function selectColor(productId, color) {
   const p = _products[productId];
   if (!p) return;
-  const color = document.getElementById(`color-${productId}`)?.value;
-  const sizeEl = document.getElementById(`size-${productId}`);
+  const colors = [...new Set(p.variants.map(v => v.color).filter(Boolean))];
 
-  // Mettre à jour les tailles disponibles pour cette couleur
-  const filtered = color ? p.variants.filter(v => v.color === color) : p.variants;
-  const sizes = [...new Set(filtered.map(v => v.size).filter(Boolean))];
-  sizeEl.innerHTML = `<option value="">📐 Choisir une taille</option>`
-    + sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+  colors.forEach(c => {
+    const btn = document.getElementById(`colorBtn-${productId}-${c.replace(/\s/g,'_')}`);
+    if (btn) { btn.style.border = c === color ? '3px solid var(--dark)' : '2px solid #ddd'; btn.style.transform = c === color ? 'scale(1.25)' : ''; }
+  });
 
-  // Mettre à jour l'image si une image par couleur est disponible
+  document.getElementById(`colorLabel-${productId}`).textContent = color;
+  _products[productId]._selectedColor = color;
+  _products[productId]._selectedSize = null;
+  document.getElementById(`sizeLabel-${productId}`).textContent = '—';
+
+  const sizes = [...new Set(p.variants.filter(v => v.color === color).map(v => v.size).filter(Boolean))];
+  document.getElementById(`sizePicker-${productId}`).innerHTML = sizes.map(s => `
+    <button onclick="selectSize(${productId}, '${s}')" id="sizeBtn-${productId}-${s}"
+      style="padding:6px 13px;border-radius:8px;border:2px solid #e0e0e0;background:white;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all .2s;color:#666">
+      ${s}
+    </button>`).join('');
+
   const imgEl = document.getElementById(`img-${productId}`);
-  if (imgEl && color && p.colorImages?.[color]) {
-    imgEl.src = p.colorImages[color];
-  } else if (imgEl) {
-    imgEl.src = p.image; // fallback image principale
+  if (imgEl) {
+    imgEl.style.opacity = '0';
+    setTimeout(() => { imgEl.src = p.colorImages?.[color] || p.image; imgEl.style.opacity = '1'; }, 200);
   }
+}
+
+function selectSize(productId, size) {
+  const p = _products[productId];
+  if (!p) return;
+  document.getElementById(`sizePicker-${productId}`).querySelectorAll('button').forEach(btn => {
+    btn.style.background = 'white'; btn.style.color = '#666'; btn.style.borderColor = '#e0e0e0';
+  });
+  const sel = document.getElementById(`sizeBtn-${productId}-${size}`);
+  if (sel) { sel.style.background = 'var(--dark)'; sel.style.color = 'white'; sel.style.borderColor = 'var(--dark)'; }
+  document.getElementById(`sizeLabel-${productId}`).textContent = size;
+  _products[productId]._selectedSize = size;
+  const color = p._selectedColor;
+  const variant = p.variants.find(v => v.size === size && (!color || v.color === color));
+  if (variant) document.getElementById(`price-${productId}`).textContent = parseFloat(variant.price).toFixed(2);
 }
 
 function addPrintfulToCart(productId, type) {
   const p = _products[productId];
   if (!p) return;
-  const colorEl = document.getElementById(`color-${productId}`);
-  const color = colorEl ? colorEl.value : null;
-  const size = document.getElementById(`size-${productId}`)?.value;
   const colors = [...new Set(p.variants.map(v => v.color).filter(Boolean))];
-
+  const color = p._selectedColor || null;
+  const size = p._selectedSize || null;
   if (colors.length > 1 && !color) { showToast('⚠️ Choisissez une couleur !'); return; }
   if (!size) { showToast('⚠️ Choisissez une taille !'); return; }
-
   const variant = p.variants.find(v => v.size === size && (colors.length <= 1 || v.color === color));
   if (!variant) { showToast('⚠️ Variante introuvable'); return; }
-
   const existing = cart.find(x => x.variantId === variant.id);
   if (existing) { existing.qty++; }
   else {
-    cart.push({
-      id: variant.id, variantId: variant.id, productId: p.id,
-      name: p.name, desc: [color, size].filter(Boolean).join(' / '),
-      price: parseFloat(variant.price),
-      emoji: type === 'sport' ? '👕' : '🐂', qty: 1, size, color,
-    });
+    cart.push({ id: variant.id, variantId: variant.id, productId: p.id, name: p.name,
+      desc: [color, size].filter(Boolean).join(' / '), price: parseFloat(variant.price),
+      emoji: type === 'sport' ? '👕' : '🐂', qty: 1, size, color });
   }
   updateCartUI();
   showToast(`✅ ${p.name} (${[color, size].filter(Boolean).join(' / ')}) ajouté !`);
@@ -439,10 +488,8 @@ async function processPayment() {
   const zip = document.getElementById('payZip').value;
   const country = document.getElementById('payCountry').value;
   if (!name || !email || !address || !city || !zip) { showToast('⚠️ Remplissez tous les champs'); return; }
-
   const btn = document.getElementById('payBtn');
   btn.textContent = '⏳ Traitement...'; btn.disabled = true;
-
   try {
     const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
     const piRes = await fetch('/api/create-payment', {
@@ -454,12 +501,10 @@ async function processPayment() {
       payment_method: { card: cardElement, billing_details: { name, email } }
     });
     if (error) { showToast('❌ ' + error.message); btn.textContent = 'Payer'; btn.disabled = false; return; }
-
     await fetch('/api/create-order', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, address: { line1: address, city, country, zip }, items: cart })
     });
-
     document.getElementById('checkoutForm').style.display = 'none';
     document.getElementById('successModal').style.display = 'block';
   } catch (err) {
@@ -479,17 +524,13 @@ async function loadProducts() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (!data.products?.length) throw new Error('Pas de produits');
-
-    // Les 2 premiers produits → Sport, le reste → Lifestyle
-    // Ajustez ce découpage selon votre boutique Printful
     const sport = data.products.slice(0, 2);
     const lifestyle = data.products.slice(2);
-
     renderPrintfulGridAndStore(sport, 'sportGrid', 'sport');
     renderPrintfulGridAndStore(lifestyle, 'lifestyleGrid', 'lifestyle');
   } catch (err) {
     console.error('Erreur chargement produits:', err);
-    document.getElementById('sportGrid').innerHTML = '<p style="text-align:center;color:#e63946;padding:2rem">❌ Impossible de charger les produits. Réessayez.</p>';
+    document.getElementById('sportGrid').innerHTML = '<p style="text-align:center;color:#e63946;padding:2rem">❌ Impossible de charger les produits.</p>';
     document.getElementById('lifestyleGrid').innerHTML = '';
   }
   updateCartUI();
