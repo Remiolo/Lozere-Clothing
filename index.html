@@ -421,6 +421,7 @@ function addPrintfulToCart(productId, type) {
   else {
     cart.push({ id: variant.id, variantId: variant.id, productId: p.id, name: p.name,
       desc: [color, size].filter(Boolean).join(' / '), price: parseFloat(variant.price),
+      image: p.colorImages?.[color] || p.image,
       emoji: type === 'sport' ? '👕' : '🐂', qty: 1, size, color });
   }
   updateCartUI();
@@ -450,7 +451,9 @@ function updateCartUI() {
   } else {
     itemsEl.innerHTML = cart.map(x => `
       <div class="cart-item">
-        <div class="cart-item-img">${x.emoji}</div>
+        <div class="cart-item-img" style="overflow:hidden;padding:0">
+          <img src="${x.image}" alt="${x.name}" style="width:100%;height:100%;object-fit:contain;padding:4px">
+        </div>
         <div class="cart-item-info">
           <h4>${x.name}</h4>
           <p>${x.desc}</p>
